@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>png optimizer</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div class="container" id="app">
+    <div class="inputArea">
+        <div class="input-dropzone" id="div_dropzone"
+         v-on:dragover.prevent
+         v-on:drop.prevent="dropzone_drop($event)"
+         v-on:click = "dropzone_click()"
+        >
+            <!-- <span>拖拽 .png 或者 .zip 文件到这里</span> -->
+            <span>Drop .png or .zip files here!</span>
+        </div>
+        <input type="file" multiple class="input-inpfile" id="inp_file"
+          ref="inp_file"
+          v-on:change="dropzone_fileChange($event)"
+        >
+    </div>
+    <div class="outputArea">
+        <div class="output-list">
+            <!-- count -->
+            <div class="output-list__count">
+                <template v-if="completeFiles.length<2">{{completeFiles.length}} file optimized</template>
+                <template v-else>{{completeFiles.length}} files optimized</template>
+                ,
+                <template v-if="checkedFiles.length<2">{{checkedFiles.length}} file selected</template>
+                <template v-else>{{checkedFiles.length}} files selected</template>
+            </div>
+            <!-- list items -->
+            <div class="output-list__item"
+              v-for="(item, index) of list"
+            >
+                <div class="check">
+                    <i
+                      v-bind:class="{'is-checked':item.done && item.checked}"
+                      v-on:click="file_checked(item)"
+                    ></i>
+                </div>
+                <div class="filename">
+                    <span v-if="item.fromZip" style="color:#999;">[ {{item.fromZip}} ]</span> {{item.name}}
+                </div>
+                <div class="optimization">
+                    <template v-if="item.error!=1">
+                    <span class="optimization__before">{{fileSizeFormat(item.originalSize)}}</span>
+                    <span class="optimization__arrow">&#xf061;</span>
+                    <span class="optimization__after"
+                      v-bind:style="{color:(item.error==2?'red':'')}"
+                    >{{fileSizeFormat(item.nowSize)}}</span>
+                    </template>
+                    <template v-else>
+                    unsupported file type
+                    </template>
+                </div>
+                <div class="operate">
+                    <template v-if="item.done">
+                        <span title="download" class="btn-download"
+                          v-on:click="file_download(item)"
+                        >&#xf0ed;</span>
+                        <span title="preview" class="btn-preview"
+                          v-on:click="file_preview(item)"
+                        >&#xf00e;</span>
+                        <span title="remove" class="btn-remove"
+                          v-on:click="file_remove(index)"
+                        >&#xf00d;</span>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <div class="output-download" v-if="list.length>0">
+            <span class="btn-downloadAll" v-on:click="file_downloadall">Download All</span>
+            <span class="btn-removeAll" v-on:click="file_removeall">Remove All</span>
+        </div>
+    </div>
+</div>
+
+<div class="powerby">
+    Dependencies: <a href="https://github.com/photopea/UPNG.js">upng</a>, <a href="https://stuk.github.io/jszip/">jszip</a>, <a href="https://vuejs.org/">vue</a>
+</div>
+
+<script src="js/vue.min.js"></script>
+<script src="js/pako.min.js"></script>
+<script src="js/UPNG.js"></script>
+<script src="js/jszip.min.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
