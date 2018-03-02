@@ -32,44 +32,46 @@
                 <template v-else>{{checkedFiles.length}} files selected</template>
             </div>
             <!-- list items -->
-            <div class="output-list__item"
-              v-for="(item, index) of list"
-            >
-                <div class="check">
-                    <i
-                      v-bind:class="{'is-checked':item.done && item.checked}"
-                      v-on:click="file_checked(item)"
-                    ></i>
-                </div>
-                <div class="filename">
-                    <span v-if="item.fromZip" style="color:#999;">[ {{item.fromZip}} ]</span> {{item.name}}
-                </div>
-                <div class="optimization">
-                    <template v-if="item.error!=1">
-                    <span class="optimization__before">{{fileSizeFormat(item.originalSize)}}</span>
-                    <span class="optimization__arrow">&#xf061;</span>
-                    <span class="optimization__after"
-                      v-bind:style="{color:(item.error==2?'red':'')}"
-                    >{{fileSizeFormat(item.nowSize)}}</span>
-                    </template>
-                    <template v-else>
-                    unsupported file type
-                    </template>
-                </div>
-                <div class="operate">
-                    <template v-if="item.done">
+            <template v-for="(item, index) of list">
+                <div class="output-list__item">
+                    <div class="check">
+                        <i
+                          v-bind:class="{'is-checked':item.done && item.checked}"
+                          v-on:click="file_checked(item)"
+                        ></i>
+                    </div>
+                    <div class="filename">
+                        <span v-if="item.fromZip" style="color:#999;">[ {{item.fromZip}} ]</span> {{item.name}}
+                    </div>
+                    <div class="optimization">
+                        <template v-if="item.error!=1">
+                        <span class="optimization__before">{{fileSizeFormat(item.originalSize)}}</span>
+                        <span class="optimization__arrow">&#xf061;</span>
+                        <span class="optimization__after"
+                          v-bind:style="{color:(item.error==2?'red':'')}"
+                          v-if="item.done"
+                        >{{fileSizeFormat(item.size)}}</span>
+                        </template>
+                        <template v-else>
+                        file type error
+                        </template>
+                    </div>
+                    <div class="operate">
                         <span title="download" class="btn-download"
                           v-on:click="file_download(item)"
+                          v-if="item.done"
                         >&#xf0ed;</span>
                         <span title="preview" class="btn-preview"
                           v-on:click="file_preview(item)"
+                          v-if="item.done"
                         >&#xf00e;</span>
                         <span title="remove" class="btn-remove"
                           v-on:click="file_remove(index)"
                         >&#xf00d;</span>
-                    </template>
+                    </div>
                 </div>
-            </div>
+            </template>
+
         </div>
         <div class="output-download" v-if="list.length>0">
             <span class="btn-downloadAll" v-on:click="file_downloadall">Download All</span>

@@ -12,7 +12,7 @@ list item
     id:,
     name: file.name,
     originalSize: file.size,
-    nowSize: "",
+    size: "",
     blob: null,
     done: false,
     checked: true,
@@ -21,6 +21,33 @@ list item
     error: 0
 }
 */
+/**
+* Myfile
+* @class
+*/
+var Myfile = function(file){
+    this.id = file.name + "_" + createid(8);
+    this.name = file.name;
+    this.type = file.type;
+    this.file = file;
+    this.originalSize = file.size;
+    this.size = file.size;
+    this.fromZip = file.fromZip;
+    this.fromZipID = file.fromZipID;
+    this.buffer = file.buffer;
+    this.url = "";
+    this.done = false;
+    this.checked = false;
+    this.error = 0;
+}
+function createid(length) {
+    length = (isNaN(length) || length < 4) ? 8 : length;
+    var table = "0123456789abcdefghijklmnopqrstuvwxyz",
+        table_len = table.length;
+    return Array(+length).fill().map(function(){
+            return table[Math.round(Math.random() * table_len)]
+        }).join("");
+}
 
 // vue app
 var app = new Vue({
@@ -32,20 +59,20 @@ var app = new Vue({
         var worker = this.worker = new Worker("js/worker-optimize.js");
         // worker onmessage事件
         worker.onmessage = function(ev) {
-            var data = ev.data;
-            switch(data.msg) {
+            var msgdata = ev.data;
+            switch(msgdata.msg) {
                 // 上传文件完成
-                case "upload" :
-                    me.list.push(data.file);
+                case "unzipComplete" :
+                    me.list.push(msgdata.file);
                     break;
                 // 上传文件优化完成
                 case "optimizeComplete": 
-                    me.updateItem(data.file.id, data.file);
+                    me.updateItem(msgdata.file.id, msgdata.file);
                     break;
                 // 文件打包压缩完成
                 case "compressComplete":
                     // 缓存blob url
-                    me.zip_url = createUrl(data.file);
+                    me.zip_url = createUrl(msgdata.file);
                     save(me.zip_url, "images.zip");
                     break;
             }
@@ -75,14 +102,15 @@ var app = new Vue({
         // 文件列表 -下载
         file_download: function(item) {
             if(!item.url) {
-                item.url = createUrl(new Blob([new Uint8Array(item.buffer)], {type: "image/png"}), item.name);
+                item.url = createUrl(new Blob([item.buffer], {type: "image/png"}), item.name);
             }
             save(item.url, item.name);
         },
         // 文件列表 -预览
         file_preview: function(item) {
             if(!item.url) {
-                item.url = createUrl(new Blob([new Uint8Array(item.buffer)], {type: "image/png"}), item.name);
+                // item.url = createUrl(new Blob([new Uint8Array(item.buffer)], {type: "image/png"}), item.name);
+                item.url = createUrl(new Blob([item.buffer], {type: "image/png"}), item.name);
             }
             previewpopup.show(item.url);
         },
@@ -100,7 +128,6 @@ var app = new Vue({
             // 如果选中文件未改变
             else if(this.isCheckedFilesKeeped && this.zip_url) {
                 save(this.zip_url, "images.zip");
-                console.log("cache:", this.zip_url)
             }
             // 如果选中文件发生了变化
             else {
@@ -110,7 +137,7 @@ var app = new Vue({
                     files: this.checkedFiles
                 });
                 // 缓存当前选中id
-                this.zip_checkedId = this.checkedFilesId.concat([]);
+                this.zip_checkedId = this.checkedFilesId;
             }
         },
         // 移除所有文件
@@ -125,11 +152,26 @@ var app = new Vue({
                 window.URL.revokeObjectURL(tmp.url);
             }
         },
-        // 优化图片，向worker发送message
+        // 优化图片的处理，过滤掉不支持的文件并发送给worker
         optimize: function (files) {
+            var me = this;
+            // 过滤上传文件
+            var list = Array.from(files).reduce(function(arr, file){
+                var myfile = new Myfile(file);
+                if(myfile.type != "application/x-zip-compressed" && file.type != "image/png") {
+                    myfile.type = "unsupported";
+                    myfile.error = 1;
+                    myfile.file = null;
+                }
+                if(myfile.type != "application/x-zip-compressed") {
+                    me.list.push(myfile);
+                }
+                return myfile.type == "unsupported" ? arr : arr.concat([myfile])
+            }, []);
+            // postmassage
             this.worker.postMessage({
                 msg: "optimize",
-                files: files
+                files: list
             });
         },
         // file size 格式化
@@ -146,8 +188,9 @@ var app = new Vue({
         // updateItem
         updateItem: function (id, obj) {
             var item = this.getItem(id);
+            if(!item) return;
             for(var key in obj) {
-                item[key] = obj[key];
+              item[key] = obj[key];
             }
         }
     },
@@ -205,15 +248,23 @@ var previewpopup = (function(){
     var box = document.createElement("div");
     box.className = "popup-preview";
     box.appendChild(img);
+    var isshow = false;
     var popup = {
-            show: function(src) {
-                img.src = src;
-                body.appendChild(box);
-            },
-            hide: function() {
-                body.removeChild(box)
-            }
-        };
+        show: function(src) {
+            if(isshow) return;
+            img.src = src;
+            body.appendChild(box);
+            isshow = !isshow;
+        },
+        hide: function() {
+            if(!isshow) return;
+            body.removeChild(box);
+            isshow = !isshow;
+        }
+    };
     box.addEventListener("click", popup.hide);
+    body.addEventListener("keyup", function(){
+        popup.hide();
+    })
     return popup;
 })();
