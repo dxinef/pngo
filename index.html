@@ -31,6 +31,7 @@
                 ,
                 <template v-if="checkedFiles.length<2">{{checkedFiles.length}} file selected</template>
                 <template v-else>{{checkedFiles.length}} files selected</template>
+                <template v-if="checkedFiles.length>0">( -{{fileSizeFormat(checkedFilesSize.before - checkedFilesSize.after)}} )</template>
             </div>
             <!-- //count -->
             <!-- list -->
@@ -50,14 +51,14 @@
                         <div class="optimization">
                             <template v-if="item.error!=1">
                             <span class="optimization__before">{{fileSizeFormat(item.originalSize)}}</span>
-                            <span class="fontawesome">&#xf061;</span>
+                            <span class="fontawesome" style="color:#999;">&#xf061;</span>
                             <span class="optimization__after"
-                              v-bind:style="{color:(item.error==2?'red':'')}"
+                              v-bind:style="{color:(item.error==2?'red':'#0a7')}"
                               v-if="item.done"
                             >{{fileSizeFormat(item.size)}}</span>
                             </template>
                             <template v-else>
-                            file type error
+                            <span style="color:red;">file type error</span>
                             </template>
                         </div>
                         <div class="operate">
@@ -87,7 +88,7 @@
 
 <div class="powerby">
     <p>Dependencies: <a class="powerby__dep" href="https://github.com/photopea/UPNG.js">upng</a>, <a class="powerby__dep" href="https://stuk.github.io/jszip/">jszip</a>, <a class="powerby__dep" href="https://vuejs.org/">vue</a></p>
-    <p>&copy; 杜草原 <a href="https://github.com/dxinef/pngo/" class="fontawesome powerby__git">&#xf09b;</i></a></p>
+    <p><a href="https://github.com/dxinef/pngo/" class="powerby__git">&copy; 杜草原 <i class="fontawesome">&#xf09b;</i></a></p>
 </div>
 
 <script src="js/vue.min.js"></script>

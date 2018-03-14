@@ -207,6 +207,12 @@ var app = new Vue({
                 return item.checked && item.done
             });
         },
+        // 选中的文件总size
+        checkedFilesSize: function() {
+            return this.checkedFiles.reduce(function(acc, cur){
+                return {before: acc.before + cur.originalSize, after: acc.after + cur.size}
+            }, {before: 0, after: 0})
+        },
         // 选中的文件的id
         checkedFilesId: function() {
             return this.checkedFiles.map(function(item){
