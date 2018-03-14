@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>png optimizer</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1.0, minimum-scale=1.0, shrink-to-fit=no">
+    <title>PNGO!</title>
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
@@ -22,56 +23,60 @@
         >
     </div>
     <div class="outputArea">
-        <div class="output-list">
+        <div class="output-inner">
             <!-- count -->
-            <div class="output-list__count">
+            <div class="output-listCount">
                 <template v-if="completeFiles.length<2">{{completeFiles.length}} file optimized</template>
                 <template v-else>{{completeFiles.length}} files optimized</template>
                 ,
                 <template v-if="checkedFiles.length<2">{{checkedFiles.length}} file selected</template>
                 <template v-else>{{checkedFiles.length}} files selected</template>
             </div>
-            <!-- list items -->
-            <template v-for="(item, index) of list">
-                <div class="output-list__item">
-                    <div class="check">
-                        <i
-                          v-bind:class="{'is-checked':item.done && item.checked}"
-                          v-on:click="file_checked(item)"
-                        ></i>
+            <!-- //count -->
+            <!-- list -->
+            <div class="output-list" v-if="list.length > 0">
+                <!-- list items -->
+                <template v-for="(item, index) of list">
+                    <div class="output-list__item">
+                        <div class="check">
+                            <i
+                              v-bind:class="{'is-checked':item.done && item.checked}"
+                              v-on:click="file_checked(item)"
+                            ></i>
+                        </div>
+                        <div class="filename">
+                            <span v-if="item.fromZip" style="color:#999;">[ {{item.fromZip}} ]</span> {{item.name}}
+                        </div>
+                        <div class="optimization">
+                            <template v-if="item.error!=1">
+                            <span class="optimization__before">{{fileSizeFormat(item.originalSize)}}</span>
+                            <span class="fontawesome">&#xf061;</span>
+                            <span class="optimization__after"
+                              v-bind:style="{color:(item.error==2?'red':'')}"
+                              v-if="item.done"
+                            >{{fileSizeFormat(item.size)}}</span>
+                            </template>
+                            <template v-else>
+                            file type error
+                            </template>
+                        </div>
+                        <div class="operate">
+                            <span title="download" class="btn-download"
+                              v-on:click="file_download(item)"
+                              v-if="item.done"
+                            >&#xf0ed;</span>
+                            <span title="preview" class="btn-preview"
+                              v-on:click="file_preview(item)"
+                              v-if="item.done"
+                            >&#xf00e;</span>
+                            <span title="remove" class="btn-remove"
+                              v-on:click="file_remove(index)"
+                            >&#xf00d;</span>
+                        </div>
                     </div>
-                    <div class="filename">
-                        <span v-if="item.fromZip" style="color:#999;">[ {{item.fromZip}} ]</span> {{item.name}}
-                    </div>
-                    <div class="optimization">
-                        <template v-if="item.error!=1">
-                        <span class="optimization__before">{{fileSizeFormat(item.originalSize)}}</span>
-                        <span class="optimization__arrow">&#xf061;</span>
-                        <span class="optimization__after"
-                          v-bind:style="{color:(item.error==2?'red':'')}"
-                          v-if="item.done"
-                        >{{fileSizeFormat(item.size)}}</span>
-                        </template>
-                        <template v-else>
-                        file type error
-                        </template>
-                    </div>
-                    <div class="operate">
-                        <span title="download" class="btn-download"
-                          v-on:click="file_download(item)"
-                          v-if="item.done"
-                        >&#xf0ed;</span>
-                        <span title="preview" class="btn-preview"
-                          v-on:click="file_preview(item)"
-                          v-if="item.done"
-                        >&#xf00e;</span>
-                        <span title="remove" class="btn-remove"
-                          v-on:click="file_remove(index)"
-                        >&#xf00d;</span>
-                    </div>
-                </div>
-            </template>
-
+                </template>
+            </div>
+            <!-- //list -->
         </div>
         <div class="output-download" v-if="list.length>0">
             <span class="btn-downloadAll" v-on:click="file_downloadall">Download All</span>
@@ -81,7 +86,8 @@
 </div>
 
 <div class="powerby">
-    Dependencies: <a href="https://github.com/photopea/UPNG.js">upng</a>, <a href="https://stuk.github.io/jszip/">jszip</a>, <a href="https://vuejs.org/">vue</a>
+    <p>Dependencies: <a class="powerby__dep" href="https://github.com/photopea/UPNG.js">upng</a>, <a class="powerby__dep" href="https://stuk.github.io/jszip/">jszip</a>, <a class="powerby__dep" href="https://vuejs.org/">vue</a></p>
+    <p>&copy; 杜草原 <a href="https://github.com/dxinef/pngo/" class="fontawesome powerby__git">&#xf09b;</i></a></p>
 </div>
 
 <script src="js/vue.min.js"></script>
