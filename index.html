@@ -70,7 +70,11 @@
                             <span title="preview" class="btn-preview"
                               v-on:click="file_preview(item)"
                               v-if="item.done"
-                            >&#xf00e;</span>
+                            >&#xf03e;</span>
+                            <span title="base64" class="btn-base64"
+                              v-on:click="file_base64(item)"
+                              v-if="item.done && item.size < 10000"
+                            >&#xf0d0;</span>
                             <span title="remove" class="btn-remove"
                               v-on:click="file_remove(index)"
                             >&#xf00d;</span>
@@ -90,6 +94,14 @@
 <div class="powerby">
     <p>Dependencies: <a class="powerby__dep" href="https://github.com/photopea/UPNG.js">upng</a>, <a class="powerby__dep" href="https://stuk.github.io/jszip/">jszip</a>, <a class="powerby__dep" href="https://vuejs.org/">vue</a></p>
     <p><a href="https://github.com/dxinef/pngo/" class="powerby__git">&copy; 杜草原 <i class="fontawesome">&#xf09b;</i></a></p>
+</div>
+
+<div class="popup popup-preview" id="popup-preview" onclick="javascript:Popup.hide()">
+    <img src="">
+</div>
+
+<div class="popup popup-base64" id="popup-base64" onclick="javascript:Popup.hide()">
+    <textarea onmouseover="javascript:this.select();">123123123</textarea>
 </div>
 
 <script src="js/vue.min.js"></script>

@@ -114,6 +114,15 @@ var app = new Vue({
             }
             previewpopup.show(item.url);
         },
+        // 文件列表 - 转码base64
+        file_base64: function(item) {
+            var reader = new FileReader();
+            reader.addEventListener("load", function () {
+                console.log(reader.result);
+                base64popup.show(reader.result);
+            }, false);
+            reader.readAsDataURL(new Blob([item.buffer], {type: "image/png"}));
+        },
         // 文件列表 -移除
         file_remove: function(index) {
             window.URL.revokeObjectURL(this.list[index].url);
@@ -247,30 +256,50 @@ function save(url, filename) {
     document.body.removeChild(a);
 }
 
+
+// Popup
+var Popup = (function(){
+    var curbox = null;
+    function show(id, callback) {
+        curbox = document.getElementById(id);
+        curbox.style.display = "block";
+        if(typeof callback == "function") callback(curbox);
+    }
+    function hide() {
+        if(curbox) {
+            curbox.style.display = "none";
+            curbox = null;
+        }
+    }
+    document.body.addEventListener("keyup", function(ev){
+        if(ev.keyCode==27) hide();
+    });
+    return {
+        show: show,
+        hide: hide
+    }
+})();
+
 // previewpopup
 var previewpopup = (function(){
-    var body = document.body;
-    var img = new Image();
-    var box = document.createElement("div");
-    box.className = "popup-preview";
-    box.appendChild(img);
-    var isshow = false;
-    var popup = {
+    return {
         show: function(src) {
-            if(isshow) return;
-            img.src = src;
-            body.appendChild(box);
-            isshow = !isshow;
-        },
-        hide: function() {
-            if(!isshow) return;
-            body.removeChild(box);
-            isshow = !isshow;
+            Popup.show("popup-preview", function(box){
+                var el = box.getElementsByTagName("img")[0];
+                el.src = src;
+            });
         }
-    };
-    box.addEventListener("click", popup.hide);
-    body.addEventListener("keyup", function(){
-        popup.hide();
-    })
-    return popup;
+    }
+})();
+
+// base64popup
+var base64popup = (function(){
+    return {
+        show: function(content) {
+            Popup.show("popup-base64", function(box){
+                var el = box.getElementsByTagName("textarea")[0];
+                el.value = content;
+            });
+        }
+    }
 })();
