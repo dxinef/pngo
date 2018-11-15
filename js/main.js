@@ -185,7 +185,7 @@ var app = new Vue({
         },
         // file size 格式化
         fileSizeFormat: function(size) {
-            return !size ? "" : (size > 1024 * 1024) ? ((size / 1024 * 1024).toFixed(1) + "MB") : (size > 1024) ? ((size / 1024).toFixed(1) + "KB") : ((size / 1024).toFixed(2) + "KB")
+            return !size ? "" : (size > 1024 * 1024) ? ((size / 1024 / 1024).toFixed(1) + "MB") : (size > 1024) ? ((size / 1024).toFixed(1) + "KB") : ((size / 1024).toFixed(2) + "KB")
         },
         // getItem by id
         getItem: function (id) {
